@@ -1,5 +1,6 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+from django.conf import settings
 import uuid
 import random
 import string
@@ -8,6 +9,9 @@ import datetime
 # Create your models here.
 
 # plan: resize and upload image to aws storage
+
+# User = settings.AUTH_USER_MODEL
+User = get_user_model()
 
 
 def generate__code():
@@ -34,21 +38,6 @@ def get_image_filepath(instance, filename):
 
     return f"{_lowered_class_name}_images/{obj_name}/{filename}"
 
-
-class Dipping(models.Model):
-    name = models.CharField(max_length=100, null=False, unique=True)
-    dipping_img = models.ImageField(
-        verbose_name="dipping image",
-        upload_to=get_image_filepath,
-        null=True,
-        default=default_image
-    )
-    number = models.IntegerField(default=0)
-    carlos = models.IntegerField()
-    price = models.FloatField(default=0.0)
-
-    def __str__(self):
-        return self.name
 
 #Dough, Cheese, Sauce, Topping are pizza ingredients and bases
 # name, medium_only, group, type, image, price, special_instructions, 

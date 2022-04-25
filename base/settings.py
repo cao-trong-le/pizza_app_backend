@@ -37,6 +37,7 @@ if not DEBUG:
 # Application definition
 INSTALLED_APPS = [
     'pizzaordering.apps.PizzaorderingConfig',
+    'user_management.apps.UserManagementConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -180,7 +181,12 @@ REST_FRAMEWORK = {
     ]
 }
 
-CORS_ORIGIN_ALLOW_ALL = True
+# CORS_ORIGIN_ALLOW_ALL = True
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000"
+]
+
 
 CSRF_COOKIE_SECURE = True
 
@@ -238,6 +244,9 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5),
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 }
+
+# Custom user model
+AUTH_USER_MODEL = "user_management.NewUser"
 
 
 

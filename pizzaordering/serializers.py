@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import (
-    Product, Base, Order, Dipping, Receipt, SecretKeys
+    Product, Base, Order, Receipt, SecretKeys
 )
 from rest_framework.serializers import ValidationError
 from rest_framework.serializers import (

@@ -13,7 +13,7 @@ from .serializers import (
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import (
-    Product, Base, Order, Dipping, Receipt, SecretKeys
+    Product, Base, Order, Receipt, SecretKeys
 )
 import datetime
 import json
