@@ -6,6 +6,8 @@ urlpatterns = [
          name="product-view"),
     path('product/base/', views.BaseView.as_view(),
          name="base-view"),
+    path('product/base/<str:key>/', views.BaseView.as_view(),
+         name="base-view"),
     path('order/', views.OrderView.as_view(),
          name="order-view"),
     path('receipt/', views.ReceiptView.as_view(), name="receipt-view"),

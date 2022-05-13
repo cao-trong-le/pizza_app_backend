@@ -34,6 +34,8 @@ stripe.api_key = "*******************"
 
 # email
 
+from .event_handler import EventHandler
+
 
 class RetrieveKeys(APIView):
     permission_classes = (permissions.AllowAny,)
@@ -45,7 +47,6 @@ class RetrieveKeys(APIView):
         data = self.serializer_class(instance=key).data
 
         return Response({"key": data}, status=status.HTTP_200_OK)
-
 
 class CreatePayment(APIView):
     permission_classes = (permissions.AllowAny,)
@@ -163,27 +164,79 @@ class FindNearestRestaurants(APIView):
 class BaseView(APIView):
     permission_classes = (permissions.AllowAny,)
     serializer_class = BaseSerializer
-    queryset = Base.objects.all()
+    queryset = Base.objects
+    return_data = None
+    
+    def get(self, request, key):
+        event_handler = EventHandler(request)
+        
+        if request.method == 'GET':
+            if (key == "all"):
+                self.return_data = event_handler.base_event_handler.get_all_bases()
+            else:
+                self.return_data = event_handler.base_event_handler.get_bases(key)
+            
+                # data = self.serializer_class(bases, many=True).data
+            return Response({"data": self.return_data}, status=status.HTTP_200_OK)
+
+            # else:
+            #     return Response({"data": "None"}, status=status.HTTP_200_OK)
+            
+        elif request.method == 'POST':
+            print(request.data)
+            return Response({"data": "it passes through"}, status=status.HTTP_200_OK)
+
+        return Response({'message': 'Bad Request'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    def post(self, request):
+        event_handler = EventHandler(request)
+        
+        if request.method == "POST":
+            request_event = request.data.get("request_event", None)
+            
+            if request_event == "add_base":
+                # print(request.data.get("base_name", None))
+                # print(request.FILES)
+                
+                data = event_handler.base_event_handler.add_base()
+                
+                return Response(data, status=status.HTTP_200_OK)
+            
+            if request_event == "add_product":
+                data = event_handler.product_event_handler.add_product()
+                return Response(data, status=status.HTTP_200_OK)
+
+            # else:
+            #     return Response({"data": "None"}, status=status.HTTP_200_OK)
+            
+        return Response({'message': 'Bad Request'}, status=status.HTTP_400_BAD_REQUEST)
 
 class ProductView(APIView):
     permission_classes = (permissions.AllowAny,)
     serializer_class = ProductSerializer
     queryset = Product.objects.all()
 
-    def get(self, request, pizzaFavorite):
+    def get(self, request):
         if request.method == 'GET':
-            pizzas = Product.objects.filter(
-                pizza_type=pizzaFavorite, is_sample=True)
+            print(request.data)
+            
+            
+            # pizzas = Product.objects.filter(
+            #     pizza_type=pizzaFavorite, is_sample=True)
 
-            if len(pizzas) > 0:
-                data = self.serializer_class(pizzas, many=True).data
+            # if len(pizzas) > 0:
+            #     data = self.serializer_class(pizzas, many=True).data
 
-                return Response({"data": data}, status=status.HTTP_200_OK)
+            return Response({"data": "it passes through"}, status=status.HTTP_200_OK)
 
-            else:
-                return Response({"data": "None"}, status=status.HTTP_200_OK)
+            # else:
+            #     return Response({"data": "None"}, status=status.HTTP_200_OK)
+            
+        elif request.method == 'POST':
+            print(request.data)
+            return Response({"data": "it passes through"}, status=status.HTTP_200_OK)
 
-            return Response({'message': 'Bad Request'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'message': 'Bad Request'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class OrderView(APIView):
