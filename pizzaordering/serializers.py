@@ -1,3 +1,4 @@
+from xmlrpc.client import boolean
 from rest_framework import serializers
 from .models import (
     Product, Base, Order, Receipt, SecretKeys
@@ -59,6 +60,7 @@ class ProductSerializer(serializers.ModelSerializer):
         
         
 class BaseSerializer(serializers.ModelSerializer):
+    base_code = serializers.CharField(required=False, read_only=True)
     base_name = serializers.CharField(required=True)
     base_description = serializers.CharField(required=False)
     base_medium_only = serializers.BooleanField(required=False)
@@ -71,6 +73,7 @@ class BaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Base
         fields = (
+            "base_code",
             "base_name", 
             "base_group", 
             "base_type", 
@@ -82,6 +85,9 @@ class BaseSerializer(serializers.ModelSerializer):
         )
         extra_kwargs = {
             "base_image": {
+                "validators": []
+            }, 
+            "base_code": {
                 "validators": []
             }
         }
@@ -118,6 +124,30 @@ class BaseSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
         # pass
+        
+    def update(self):
+        initial_data = self.initial_data
+        
+        # get instance
+        base_code = initial_data.get("base_code", None)
+        instance = self.Meta.model.objects.get(base_code=base_code)
+        
+        # replace data
+        instance.base_name = initial_data.get('base_name', instance.base_name)
+        instance.base_group = initial_data.get("base_group", instance.base_group)
+        instance.base_type = initial_data.get("base_type", instance.base_type)
+        instance.base_medium_only = bool(initial_data.get("base_medium_only", instance.base_medium_only)) 
+        instance.base_price = initial_data.get("base_price", instance.base_price)
+        instance.base_description = initial_data.get('base_description', instance.base_description)
+        instance.base_note = initial_data.get('base_note', instance.base_note)
+        
+        # save images
+        image = initial_data.get("base_image", None)
+        if image != "null":
+            instance.base_image = image
+        instance.save()
+        
+        return instance
 
 
 class OrderSerializer(serializers.ModelSerializer):

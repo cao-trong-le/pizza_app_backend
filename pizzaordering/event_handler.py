@@ -47,16 +47,64 @@ class EventHandler:
             
         
         def delete_base(self):
-            pass
-        
+            item_code = self.request.data.get("item_code", None)
+            item = self.query.filter(base_code=item_code)
+            self.request_return["request_event"] = "delete_single"
+            if item.exists():
+                item.delete()
+                self.request_return["message"] = "The item has been deleted."
+            else:
+                self.request_return["message"] = "The item does not exist."
+                self.request_return["error"] = "Not Found"
+            return self.request_return
+      
         def delete_bases(self):
-            pass
+            self.request_return["request_event"] = self.request.data.get("request_event", None)
+            item_codes = self.request.data.get("item_codes", None)
+            items = self.query.filter(base_code__in=item_codes)
+            if items.exists():
+                items.delete()
+                self.request_return["message"] = "The items have been deleted."
+            else: 
+                self.request_return["message"] = "The items do not exist."
+                self.request_return["error"] = "Not Found"
+            return self.request_return
         
         def delete_all_bases(self):
-            pass
+            self.request_return["request_event"] = self.request.data.get("request_event", None)
+            item_codes = self.request.data.get("item_codes", None)
+            items = self.query.all()
+            if items.exists():
+                items.delete()
+                self.request_return["message"] = "The items have been deleted."
+            else: 
+                self.request_return["message"] = "The items do not exist."
+                self.request_return["error"] = "Not Found"
+            return self.request_return
+       
         
         def edit_base(self):
-            pass
+            # set request_event
+            self.request_return["request_event"] = self.request.data.get("request_event", None)
+            
+            # print({**self.data}.get("base_price"))
+            # print(self.data.get("base_group"))
+            print(self.data)
+            
+            # store data
+            serializer = self.base_serializer(data=self.data)
+            print(serializer.is_valid())
+            if serializer.is_valid():
+                serializer.update()
+                self.request_return["data"] = serializer.data
+                self.request_return["message"] = "Data went through."
+            else:
+                self.request_return["message"] = "The items do not exist."
+                self.request_return["error"] = "Not Found"
+                
+        
+            return self.request_return
+            
         
         def get_bases(self, key):
             pass
@@ -68,6 +116,8 @@ class EventHandler:
             self.request_return["message"] = "Collected all bases"
             
             return self.request_return
+        
+        
         
     class ProductEventHandler:
         def __init__(self, request, request_return):

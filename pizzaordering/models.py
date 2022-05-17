@@ -5,6 +5,9 @@ import uuid
 import random
 import string
 import datetime
+import functools
+
+from pkg_resources import require
 
 
 # Create your models here.
@@ -14,12 +17,68 @@ import datetime
 # User = settings.AUTH_USER_MODEL
 User = get_user_model()
 
+characters = string.ascii_letters + string.digits + string.punctuation
 
-def generate__code():
-    characters = string.ascii_letters + string.digits
-    _code = "".join(random.choices(list(characters), k=14))
-    return f"#{_code}"
+def generate__base_code():
+    flag_check = True
+    _code = None
+    display_code = None
+    _code_list = Base.objects.values_list("base_code", flat=True)
+    
+    while flag_check:
+        _code = "".join(random.choices(list(characters), k=8))
+        display_code = f"#BASE{_code}"
+        
+        if display_code not in _code_list:
+            flag_check = False
+             
+    return display_code
 
+def generate__product_code():
+    flag_check = True
+    _code = None
+    display_code = None
+    _code_list = Product.objects.values_list("product_code", flat=True)
+    
+    while flag_check:
+        _code = "".join(random.choices(list(characters), k=10))
+        display_code = f"#PRODUCT{_code}"
+        
+        if display_code not in _code_list:
+            flag_check = False
+             
+    return display_code
+
+def generate__order_code():
+    flag_check = True
+    _code = None
+    display_code = None
+    _code_list = Order.objects.values_list("product_code", flat=True)
+    
+    while flag_check:
+        _code = "".join(random.choices(list(characters), k=10))
+        display_code = f"#ORDER{_code}"
+        
+        if display_code not in _code_list:
+            flag_check = False
+             
+    return display_code
+
+
+def generate__receipt_code():
+    flag_check = True
+    _code = None
+    display_code = None
+    _code_list = Receipt.objects.values_list("product_code", flat=True)
+    
+    while flag_check:
+        _code = "".join(random.choices(list(characters), k=12))
+        display_code = f"#RECEIPT{_code}"
+        
+        if display_code not in _code_list:
+            flag_check = False
+             
+    return display_code
 
 def default_image():
     return f"default_image/default.png"
@@ -37,6 +96,8 @@ def get_image_filepath(instance, filename):
 # name, medium_only, group, type, image, price, special_instructions, 
 
 class Base(models.Model):
+    id = models.AutoField(primary_key=True)
+    base_code = models.CharField(max_length=15, null=False, unique=True, default=generate__base_code)
     base_name = models.CharField(verbose_name="Name", max_length=255, null=False, unique=True)
     base_description = models.CharField(max_length=255, null=True, default="")
     base_medium_only = models.BooleanField(verbose_name="Medium Only", default=False)
@@ -66,17 +127,17 @@ class Base(models.Model):
         null=True, 
         default=default_image
     )
-    base_price = models.FloatField(verbose_name="Price", default=0.0)
+    base_price = models.DecimalField(verbose_name="Price", max_digits=10, default=0.0, decimal_places=2)
     base_note = models.CharField(verbose_name="Special Instruction", max_length=255, null=True, default="")
     
     def __str__(self):
         return self.base_name
     
 class Product(models.Model):
+    id = models.AutoField(primary_key=True)
+    product_code = models.CharField(max_length=15, null=False, unique=True, default=generate__product_code)
     product_name = models.CharField(max_length=100, null=False, unique=True)
-    product_code = models.CharField(
-        max_length=15, null=False, unique=True, default=generate__code)
-    product_descritpion = models.CharField(max_length=255, null=False, unique=True)
+    product_descritpion = models.CharField(max_length=255, null=True, default="")
     product_sizes = (
         ("none", "None"),
         ("small", "Small"),
@@ -120,7 +181,7 @@ class Product(models.Model):
     product_size = models.CharField(max_length=100, default="n", choices=product_sizes)
     product_slice = models.CharField(max_length=255, default=product_slices, null=True)
     product_is_sample = models.BooleanField(default=False)
-    product_base = models.ManyToManyField(to=Base, blank=True)
+    product_base = models.ManyToManyField(to=Base, blank=True, related_name="product_base")
     product_carlos = models.CharField(max_length=255, null=False, default=product_cals)
     product_price = models.CharField(max_length=255, null=False, default=product_prices)
     product_discount = models.FloatField(verbose_name="Product Discount", default=0)
@@ -129,11 +190,11 @@ class Product(models.Model):
     product_updated_date = models.DateTimeField(verbose_name="Product Updated Date", default=datetime.datetime.now)
     
     def __str__(self):
-        return self.name
+        return self.product_name
 
 class Order(models.Model):
-    order_code = models.CharField(
-        max_length=15, null=False, unique=True, default=generate__code)
+    id = models.AutoField(primary_key=True)
+    order_code = models.CharField(max_length=15, null=False, unique=True, default=generate__order_code)
     customer = models.ForeignKey(to=User, on_delete=models.CASCADE, default="")
     product = models.ManyToManyField(
         to=Product, related_name="order_pizza", blank=True)
@@ -150,6 +211,8 @@ class Order(models.Model):
         return self.order_code
 
 class Receipt(models.Model):
+    id = models.AutoField(primary_key=True)
+    receipt_code = models.CharField(max_length=15, null=False, unique=True, default=generate__receipt_code)
     customer = models.ForeignKey(to=User, on_delete=models.CASCADE)
     order = models.OneToOneField(
         to=Order,

@@ -195,22 +195,36 @@ class BaseView(APIView):
             request_event = request.data.get("request_event", None)
             
             if request_event == "add_base":
-                # print(request.data.get("base_name", None))
-                # print(request.FILES)
-                
-                data = event_handler.base_event_handler.add_base()
-                
-                return Response(data, status=status.HTTP_200_OK)
+                return_data = event_handler.base_event_handler.add_base()
+                return Response(return_data, status=status.HTTP_201_CREATED)
             
-            if request_event == "add_product":
-                data = event_handler.product_event_handler.add_product()
-                return Response(data, status=status.HTTP_200_OK)
+            if request_event == "delete_single_base":
+                return_data = event_handler.base_event_handler.delete_base()
+                return Response(return_data, status=status.HTTP_204_NO_CONTENT)
+            
+            if request_event == "delete_many_bases":
+                return_data = event_handler.base_event_handler.delete_bases()
+                return Response(return_data, status=status.HTTP_204_NO_CONTENT)
+            
+            if request_event == "delete_all_bases":
+                return_data = event_handler.base_event_handler.delete_all_bases()
+                return Response(return_data, status=status.HTTP_204_NO_CONTENT)
+            
+            if request_event == "edit_base":
+                return_data = event_handler.base_event_handler.edit_base()
+                return Response(return_data, status=status.HTTP_200_OK)
+            
+            
+            # product
+            
+            # delete a list of obj
 
             # else:
             #     return Response({"data": "None"}, status=status.HTTP_200_OK)
             
         return Response({'message': 'Bad Request'}, status=status.HTTP_400_BAD_REQUEST)
 
+   
 class ProductView(APIView):
     permission_classes = (permissions.AllowAny,)
     serializer_class = ProductSerializer
@@ -233,6 +247,11 @@ class ProductView(APIView):
             #     return Response({"data": "None"}, status=status.HTTP_200_OK)
             
         elif request.method == 'POST':
+            # if request_event == "add_product":
+            #     return_data = event_handler.product_event_handler.add_product()
+            #     return Response(return_data, status=status.HTTP_201_CREATED)
+            
+            
             print(request.data)
             return Response({"data": "it passes through"}, status=status.HTTP_200_OK)
 
